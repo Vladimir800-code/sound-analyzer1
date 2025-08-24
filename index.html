@@ -38,6 +38,7 @@
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
         
         h1 {
@@ -147,6 +148,32 @@
             display: none;
         }
         
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        
+        .language-btn {
+            padding: 6px 12px;
+            margin: 0 2px;
+            background: #f0f2ff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .language-btn.active {
+            background: #4a6bff;
+            color: white;
+            border-color: #4a6bff;
+        }
+        
+        .rtl {
+            direction: rtl;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -156,23 +183,35 @@
                 width: 100%;
                 height: auto;
             }
+            
+            .language-selector {
+                position: static;
+                margin-bottom: 15px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Анализ интенсивности звука с коррекцией фона</h1>
+        <div class="language-selector">
+            <button class="language-btn active" data-lang="ru">RU</button>
+            <button class="language-btn" data-lang="en">EN</button>
+            <button class="language-btn" data-lang="he">HE</button>
+        </div>
+        
+        <h1 id="main-title">Анализ интенсивности звука с коррекцией фона</h1>
         
         <div class="info-box">
-            <strong>Как использовать:</strong> Нажмите кнопку "Начать запись", разрешите доступ к микрофону. 
-            После 15 секунд записи вы увидите график, где:
+            <strong id="how-to-use">Как использовать:</strong> 
+            <span id="usage-description">Нажмите кнопку "Начать запись", разрешите доступ к микрофону. 
+            После 15 секунд записи вы увидите график, где:</span>
             <ul>
-                <li><span style="color: var(--signal-color); font-weight: bold;">Красная линия</span> - очищенный сигнал</li>
-                <li><span style="color: var(--background-color); font-weight: bold;">Зелёная линия</span> - фоновый шум</li>
-                <li><span style="color: var(--integral-color); font-weight: bold;">Синяя линия</span> - интегральная кривая</li>
-                <li><span style="color: var(--start-color); font-weight: bold;">Фиолетовая линия</span> - момент старта сигнала</li>
-                <li><span style="color: var(--end-color); font-weight: bold;">Розовая линия</span> - момент окончания сигнала (99% интеграла)</li>
-                <li><span style="color: var(--cutoff-color); font-weight: bold;">Оранжевая линия</span> - момент отсечения (старт + 1 сек)</li>
+                <li><span style="color: var(--signal-color); font-weight: bold;" id="signal-desc">Красная линия</span> - <span id="signal-text">очищенный сигнал</span></li>
+                <li><span style="color: var(--background-color); font-weight: bold;" id="background-desc">Зелёная линия</span> - <span id="background-text">фоновый шум</span></li>
+                <li><span style="color: var(--integral-color); font-weight: bold;" id="integral-desc">Синяя линия</span> - <span id="integral-text">интегральная кривая</span></li>
+                <li><span style="color: var(--start-color); font-weight: bold;" id="start-desc">Фиолетовая линия</span> - <span id="start-text">момент старта сигнала</span></li>
+                <li><span style="color: var(--end-color); font-weight: bold;" id="end-desc">Розовая линия</span> - <span id="end-text">момент окончания сигнала (99% интеграла)</span></li>
+                <li><span style="color: var(--cutoff-color); font-weight: bold;" id="cutoff-desc">Оранжевая линия</span> - <span id="cutoff-text">момент отсечения (старт + 1 сек)</span></li>
             </ul>
         </div>
         
@@ -181,7 +220,7 @@
         <p id="status">Готов к записи</p>
         
         <div class="results" id="results">
-            <h3>Результаты анализа:</h3>
+            <h3 id="results-title">Результаты анализа:</h3>
             <p id="start-time-result">Время старта: - сек</p>
             <p id="end-time-result">Время финиша: - сек</p>
             <p id="intensity-result">Интенсивность в точке отсечения: -</p>
@@ -190,12 +229,12 @@
         <p id="graph-title">График интенсивности звука</p>
         <canvas id="graph" width="800" height="400"></canvas>
         <div class="legend">
-            <span><i class="color-box" style="background: var(--signal-color);"></i> Сигнал</span>
-            <span><i class="color-box" style="background: var(--background-color);"></i> Фон</span>
-            <span><i class="color-box" style="background: var(--integral-color);"></i> Интеграл</span>
-            <span><i class="color-box" style="background: var(--start-color);"></i> Старт</span>
-            <span><i class="color-box" style="background: var(--end-color);"></i> Финиш</span>
-            <span><i class="color-box" style="background: var(--cutoff-color);"></i> Отсечение</span>
+            <span><i class="color-box" style="background: var(--signal-color);"></i> <span id="legend-signal">Сигнал</span></span>
+            <span><i class="color-box" style="background: var(--background-color);"></i> <span id="legend-background">Фон</span></span>
+            <span><i class="color-box" style="background: var(--integral-color);"></i> <span id="legend-integral">Интеграл</span></span>
+            <span><i class="color-box" style="background: var(--start-color);"></i> <span id="legend-start">Старт</span></span>
+            <span><i class="color-box" style="background: var(--end-color);"></i> <span id="legend-end">Финиш</span></span>
+            <span><i class="color-box" style="background: var(--cutoff-color);"></i> <span id="legend-cutoff">Отсечение</span></span>
         </div>
     </div>
 
@@ -220,6 +259,7 @@
         const startTimeResult = document.getElementById('start-time-result');
         const endTimeResult = document.getElementById('end-time-result');
         const intensityResult = document.getElementById('intensity-result');
+        const languageButtons = document.querySelectorAll('.language-btn');
 
         let audioContext;
         let analyser;
@@ -229,6 +269,199 @@
         let audioData = [];
         let backgroundNoise = [];
         let isRecording = false;
+        let currentLanguage = 'ru';
+
+        // Тексты для перевода
+        const translations = {
+            ru: {
+                title: "Анализ интенсивности звука с коррекцией фона",
+                howToUse: "Как использовать:",
+                usageDescription: "Нажмите кнопку \"Начать запись\", разрешите доступ к микрофону. После 15 секунд записи вы увидите график, где:",
+                signalDesc: "Красная линия",
+                signalText: "очищенный сигнал",
+                backgroundDesc: "Зелёная линия",
+                backgroundText: "фоновый шум",
+                integralDesc: "Синяя линия",
+                integralText: "интегральная кривая",
+                startDesc: "Фиолетовая линия",
+                startText: "момент старта сигнала",
+                endDesc: "Розовая линия",
+                endText: "момент окончания сигнала (99% интеграла)",
+                cutoffDesc: "Оранжевая линия",
+                cutoffText: "момент отсечения (старт + 1 сек)",
+                startButton: "Начать запись (15 сек)",
+                readyStatus: "Готов к записи",
+                recordingStatus: "Идёт запись...",
+                analyzingStatus: "Анализ данных...",
+                completeStatus: "Анализ завершен",
+                resultsTitle: "Результаты анализа:",
+                startTimeResult: "Время старта:",
+                endTimeResult: "Время финиша:",
+                intensityResult: "Интенсивность в точке отсечения:",
+                graphTitle: "График интенсивности звука",
+                legendSignal: "Сигнал",
+                legendBackground: "Фон",
+                legendIntegral: "Интеграл",
+                legendStart: "Старт",
+                legendEnd: "Финиш",
+                legendCutoff: "Отсечение",
+                timeLeft: "Осталось:",
+                seconds: "сек",
+                notDetected: "не обнаружено",
+                notAvailable: "не доступно",
+                startLabel: "Старт",
+                finishLabel: "Финиш (99%)",
+                cutoffLabel: "Отсечение",
+                timeLabel: "Время (секунды)",
+                intensityLabel: "Нормированная интенсивность"
+            },
+            en: {
+                title: "Sound Intensity Analysis with Background Correction",
+                howToUse: "How to use:",
+                usageDescription: "Click the \"Start Recording\" button, allow microphone access. After 15 seconds of recording, you will see a graph where:",
+                signalDesc: "Red line",
+                signalText: "cleaned signal",
+                backgroundDesc: "Green line",
+                backgroundText: "background noise",
+                integralDesc: "Blue line",
+                integralText: "integral curve",
+                startDesc: "Purple line",
+                startText: "signal start moment",
+                endDesc: "Pink line",
+                endText: "signal end moment (99% of integral)",
+                cutoffDesc: "Orange line",
+                cutoffText: "cutoff moment (start + 1 sec)",
+                startButton: "Start Recording (15 sec)",
+                readyStatus: "Ready to record",
+                recordingStatus: "Recording...",
+                analyzingStatus: "Analyzing data...",
+                completeStatus: "Analysis complete",
+                resultsTitle: "Analysis Results:",
+                startTimeResult: "Start time:",
+                endTimeResult: "Finish time:",
+                intensityResult: "Intensity at cutoff point:",
+                graphTitle: "Sound Intensity Graph",
+                legendSignal: "Signal",
+                legendBackground: "Background",
+                legendIntegral: "Integral",
+                legendStart: "Start",
+                legendEnd: "Finish",
+                legendCutoff: "Cutoff",
+                timeLeft: "Time left:",
+                seconds: "sec",
+                notDetected: "not detected",
+                notAvailable: "not available",
+                startLabel: "Start",
+                finishLabel: "Finish (99%)",
+                cutoffLabel: "Cutoff",
+                timeLabel: "Time (seconds)",
+                intensityLabel: "Normalized intensity"
+            },
+            he: {
+                title: "ניתוח עוצמת קול עם תיקון רקע",
+                howToUse: "כיצד להשתמש:",
+                usageDescription: "לחץ על הכפתור \"התחל הקלטה\", אשר גישה למיקרופון. לאחר 15 שניות של הקלטה, תראה גרף שבו:",
+                signalDesc: "קו אדום",
+                signalText: "אות נקי",
+                backgroundDesc: "קו ירוק",
+                backgroundText: "רעש רקע",
+                integralDesc: "קו כחול",
+                integralText: "עקומה אינטגרלית",
+                startDesc: "קו סגול",
+                startText: "רגע תחילת האות",
+                endDesc: "קו ורוד",
+                endText: "רגע סיום האות (99% מהאינטגרל)",
+                cutoffDesc: "קו כתום",
+                cutoffText: "רגע החיתוך (תחילה + 1 שנייה)",
+                startButton: "התחל הקלטה (15 שניות)",
+                readyStatus: "מוכן להקלטה",
+                recordingStatus: "מקליט...",
+                analyzingStatus: "מנתח נתונים...",
+                completeStatus: "הניתוח הושלם",
+                resultsTitle: "תוצאות ניתוח:",
+                startTimeResult: "זמן התחלה:",
+                endTimeResult: "זמן סיום:",
+                intensityResult: "עוצמה בנקודת החיתוך:",
+                graphTitle: "גרף עוצמת קול",
+                legendSignal: "אות",
+                legendBackground: "רקע",
+                legendIntegral: "אינטגרל",
+                legendStart: "התחלה",
+                legendEnd: "סיום",
+                legendCutoff: "חיתוך",
+                timeLeft: "נשארו:",
+                seconds: "שניות",
+                notDetected: "לא אותר",
+                notAvailable: "לא זמין",
+                startLabel: "התחלה",
+                finishLabel: "סיום (99%)",
+                cutoffLabel: "חיתוך",
+                timeLabel: "זמן (שניות)",
+                intensityLabel: "עוצמה מנורמלת"
+            }
+        };
+
+        // Функция смены языка
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            // Обновляем тексты интерфейса
+            document.getElementById('main-title').textContent = t.title;
+            document.getElementById('how-to-use').textContent = t.howToUse;
+            document.getElementById('usage-description').textContent = t.usageDescription;
+            document.getElementById('signal-desc').textContent = t.signalDesc;
+            document.getElementById('signal-text').textContent = t.signalText;
+            document.getElementById('background-desc').textContent = t.backgroundDesc;
+            document.getElementById('background-text').textContent = t.backgroundText;
+            document.getElementById('integral-desc').textContent = t.integralDesc;
+            document.getElementById('integral-text').textContent = t.integralText;
+            document.getElementById('start-desc').textContent = t.startDesc;
+            document.getElementById('start-text').textContent = t.startText;
+            document.getElementById('end-desc').textContent = t.endDesc;
+            document.getElementById('end-text').textContent = t.endText;
+            document.getElementById('cutoff-desc').textContent = t.cutoffDesc;
+            document.getElementById('cutoff-text').textContent = t.cutoffText;
+            startBtn.textContent = t.startButton;
+            document.getElementById('results-title').textContent = t.resultsTitle;
+            document.getElementById('graph-title').textContent = t.graphTitle;
+            document.getElementById('legend-signal').textContent = t.legendSignal;
+            document.getElementById('legend-background').textContent = t.legendBackground;
+            document.getElementById('legend-integral').textContent = t.legendIntegral;
+            document.getElementById('legend-start').textContent = t.legendStart;
+            document.getElementById('legend-end').textContent = t.legendEnd;
+            document.getElementById('legend-cutoff').textContent = t.legendCutoff;
+            
+            // Обновляем статус, если не идет запись
+            if (!isRecording) {
+                statusElement.textContent = t.readyStatus;
+            }
+            
+            // Обновляем направление текста для иврита
+            if (lang === 'he') {
+                document.body.classList.add('rtl');
+                document.querySelector('.container').style.direction = 'rtl';
+                document.querySelector('.info-box').style.textAlign = 'right';
+            } else {
+                document.body.classList.remove('rtl');
+                document.querySelector('.container').style.direction = 'ltr';
+                document.querySelector('.info-box').style.textAlign = 'left';
+            }
+            
+            // Обновляем активную кнопку языка
+            languageButtons.forEach(btn => {
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+            
+            // Перерисовываем график, если данные уже есть
+            if (audioData.length > 0) {
+                processAndDrawData();
+            }
+        }
 
         function initAudio() {
             try {
@@ -240,7 +473,7 @@
                 return true;
             } catch (e) {
                 console.error("Ошибка инициализации аудио:", e);
-                statusElement.textContent = "Ошибка инициализации аудио";
+                statusElement.textContent = translations[currentLanguage].errorAudioInit || "Ошибка инициализации аудио";
                 return false;
             }
         }
@@ -261,7 +494,7 @@
                 backgroundNoise = [];
                 
                 startBtn.disabled = true;
-                statusElement.textContent = "Идёт запись...";
+                statusElement.textContent = translations[currentLanguage].recordingStatus;
                 statusElement.classList.add('recording');
                 graphTitle.style.display = 'none';
                 resultsElement.style.display = 'none';
@@ -282,7 +515,7 @@
                 
             } catch (error) {
                 console.error('Ошибка при записи:', error);
-                statusElement.textContent = "Ошибка: " + error.message;
+                statusElement.textContent = translations[currentLanguage].errorRecording || "Ошибка записи: " + error.message;
                 resetRecordingState();
             }
         }
@@ -328,7 +561,7 @@
                 microphone.disconnect();
             }
             
-            statusElement.textContent = "Анализ данных...";
+            statusElement.textContent = translations[currentLanguage].analyzingStatus;
             statusElement.classList.remove('recording');
             
             setTimeout(() => {
@@ -401,7 +634,7 @@
 
         function processAndDrawData() {
             if (audioData.length === 0) {
-                statusElement.textContent = "Нет данных для анализа";
+                statusElement.textContent = translations[currentLanguage].noData || "Нет данных для анализа";
                 return;
             }
             
@@ -460,32 +693,33 @@
                     endTime, 
                     cutoffTime
                 );
-                statusElement.textContent = "Анализ завершен";
+                statusElement.textContent = translations[currentLanguage].completeStatus;
             } catch (error) {
                 console.error('Ошибка при обработке данных:', error);
-                statusElement.textContent = "Ошибка анализа данных";
+                statusElement.textContent = translations[currentLanguage].errorAnalysis || "Ошибка анализа данных";
             }
         }
 
         function showResults(startTime, endTime, cutoffIntensity) {
             resultsElement.style.display = 'block';
+            const t = translations[currentLanguage];
             
             if (startTime > 0) {
-                startTimeResult.textContent = `Время старта: ${startTime.toFixed(2)} сек`;
+                startTimeResult.textContent = `${t.startTimeResult} ${startTime.toFixed(2)} ${t.seconds}`;
             } else {
-                startTimeResult.textContent = 'Время старта: не обнаружено';
+                startTimeResult.textContent = `${t.startTimeResult} ${t.notDetected}`;
             }
             
             if (endTime > 0) {
-                endTimeResult.textContent = `Время финиша: ${endTime.toFixed(2)} сек`;
+                endTimeResult.textContent = `${t.endTimeResult} ${endTime.toFixed(2)} ${t.seconds}`;
             } else {
-                endTimeResult.textContent = 'Время финиша: не обнаружено';
+                endTimeResult.textContent = `${t.endTimeResult} ${t.notDetected}`;
             }
             
             if (cutoffIntensity !== undefined && cutoffIntensity >= 0) {
-                intensityResult.textContent = `Интенсивность в точке отсечения: ${cutoffIntensity.toFixed(4)}`;
+                intensityResult.textContent = `${t.intensityResult} ${cutoffIntensity.toFixed(4)}`;
             } else {
-                intensityResult.textContent = 'Интенсивность в точке отсечения: не доступно';
+                intensityResult.textContent = `${t.intensityResult} ${t.notAvailable}`;
             }
         }
 
@@ -508,7 +742,7 @@
         }
 
         function updateTimer(seconds) {
-            timerElement.textContent = `Осталось: ${seconds} сек`;
+            timerElement.textContent = `${translations[currentLanguage].timeLeft} ${seconds} ${translations[currentLanguage].seconds}`;
         }
 
         function resetRecordingState() {
@@ -605,6 +839,7 @@
             ctx.setLineDash([]);
 
             // Отметка старта сигнала
+            const t = translations[currentLanguage];
             if (startTime > 0 && startTime < DURATION) {
                 const startX = (startTime / DURATION) * canvas.width;
                 
@@ -620,7 +855,7 @@
                 ctx.font = '14px "Segoe UI", sans-serif';
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--start-color').trim();
                 ctx.textAlign = 'center';
-                ctx.fillText(`Старт - ${startTime.toFixed(1)} сек`, startX, canvas.height + 20);
+                ctx.fillText(`${t.startLabel} - ${startTime.toFixed(1)} ${t.seconds}`, startX, canvas.height + 20);
             }
 
             // Отметка финиша сигнала (99% интеграла)
@@ -639,7 +874,7 @@
                 ctx.font = '14px "Segoe UI", sans-serif';
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--end-color').trim();
                 ctx.textAlign = 'center';
-                ctx.fillText(`Финиш (99%) - ${endTime.toFixed(1)} сек`, endX, canvas.height + 40);
+                ctx.fillText(`${t.finishLabel} - ${endTime.toFixed(1)} ${t.seconds}`, endX, canvas.height + 40);
             }
 
             // Отметка момента отсечения
@@ -658,7 +893,7 @@
                 ctx.font = '14px "Segoe UI", sans-serif';
                 ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--cutoff-color').trim();
                 ctx.textAlign = 'center';
-                ctx.fillText(`Отсечение - ${cutoffTime.toFixed(1)} сек`, cutoffX, canvas.height + 60);
+                ctx.fillText(`${t.cutoffLabel} - ${cutoffTime.toFixed(1)} ${t.seconds}`, cutoffX, canvas.height + 60);
             }
 
             // Подписи осей
@@ -670,7 +905,7 @@
                 const x = (i / DURATION) * canvas.width;
                 ctx.fillText(i.toString(), x, canvas.height - 8);
             }
-            ctx.fillText('Время (секунды)', canvas.width / 2, canvas.height - 15);
+            ctx.fillText(t.timeLabel, canvas.width / 2, canvas.height - 15);
             
             ctx.textAlign = 'right';
             for (let i = 0; i <= 1; i += 0.2) {
@@ -681,12 +916,19 @@
             ctx.translate(15, canvas.height / 2);
             ctx.rotate(-Math.PI / 2);
             ctx.textAlign = 'center';
-            ctx.fillText('Нормированная интенсивность', 0, 0);
+            ctx.fillText(t.intensityLabel, 0, 0);
             ctx.restore();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             startBtn.addEventListener('click', startRecording);
+            
+            // Добавляем обработчики для кнопок переключения языка
+            languageButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    changeLanguage(btn.dataset.lang);
+                });
+            });
         });
     </script>
 </body>
